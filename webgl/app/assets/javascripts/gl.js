@@ -1,7 +1,9 @@
 var gl;
-var horizAspect = 480.0/640.0;
-var squareVerticesColorBuffer, squareVerticesBuffer;
-var vertexPositionAttribute, vertexColorAttribute;
+var width = 640;
+var height = 480;
+var numPoints = 50000;
+var sierpenskiVerticesBuffer;
+var sierpenskiPositionAttribute;
 var shaderProgram;
 var perspectiveMatrix, orthoMatrix;
 
@@ -105,64 +107,79 @@ function initShaders() {
   }
   
   gl.useProgram(shaderProgram);
-  
-  vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-  gl.enableVertexAttribArray(vertexPositionAttribute);
 
-  vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-  gl.enableVertexAttribArray(vertexColorAttribute);
+  sierpenskiPositionAttribute = gl.getAttribLocation(shaderProgram, "aSierpenskiPosition");
+  gl.enableVertexAttribArray(sierpenskiPositionAttribute);
+}
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function midpoint(x1, y1, x2, y2) {
+  var mid = [];
+  mid.push(((x1 + x2) / 2.0));
+  mid.push(((y1 + y2) / 2.0));
+  return mid;
+}
+
+function sierpenskiPoints (numPoints) {
+  var sp = [];
+
+  var triangle = [
+    { x:-1.0, y:-1.0, z:0.0 },
+    { x:0.0, y:1.0, z:0.0 },
+    { x:1.0, y:-1.0, z:0.0 }
+  ];
+  var pointInTriangle = { x:0.25, y:0.50, z:0 };
+
+  for (var i = 0; i < numPoints; i += 1) {
+    var randomVert = triangle[rand(0, 2)];
+    var mid = midpoint(randomVert.x, randomVert.y, pointInTriangle.x, pointInTriangle.y);
+    mid.push(0.0); //z plane
+    sp.push(mid[0]);
+    sp.push(mid[1]);
+    sp.push(mid[2]);
+    pointInTriangle = { x:mid[0], y:mid[1], z:mid[2] };
+  }
+
+  return sp;
 }
 
 function initBuffers() {
-
-  //colors
-  squareVerticesColorBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer);
-  var colors = [
-    1.0,  1.0,  1.0,  1.0,    // white
-    1.0,  0.0,  0.0,  1.0,    // red
-    0.0,  1.0,  0.0,  1.0,    // green
-    0.0,  0.0,  1.0,  1.0     // blue
-  ];
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-
-  //shape
-  squareVerticesBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
-  var vertices = [
-    1.0,  1.0,  0.0,
-    -1.0, 1.0,  0.0,
-    1.0,  -1.0, 0.0,
-    -1.0, -1.0, 0.0
-  ];
-  vertices = [
-    0.5,  0.5,  0.0,
-    -0.5, 0.5,  0.0,
-    0.5,  -0.5, 0.0,
-    -0.5, -0.5, 0.0
-  ];
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+  //sierpenski
+  sierpenskiVerticesBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, sierpenskiVerticesBuffer);
+  var sp = sierpenskiPoints(numPoints);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sp), gl.STATIC_DRAW);
 }
 
 function drawScene() {
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT);
   
-  //perspectiveMatrix = makePerspective(45, 640.0/480.0, 0.1, 100.0);
   perspectiveMatrix = makeOrtho(-1, 1, -1, 1, -1, 1);
   
   loadIdentity();
-  //mvTranslate([-0.0, 0.0, -6.0]);
-  
-  //draw shape
-  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
-  gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
-  //draw color
-  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer);
-  gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+  //draw sierpenski
+  gl.bindBuffer(gl.ARRAY_BUFFER, sierpenskiVerticesBuffer);
+  gl.vertexAttribPointer(sierpenskiPositionAttribute, 3, gl.FLOAT, true, 0, 0);
 
   setMatrixUniforms();
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  gl.drawArrays(gl.POINTS, 0, numPoints);
+}
+
+function initResolution(canvas) {
+  //set the display size of the canvas
+  //ensures high dpi displays are not blurry
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+
+  var devicePixelRatio = window.devicePixelRatio || 1;
+  canvas.width = width * devicePixelRatio;
+  canvas.height = height * devicePixelRatio;
+
+  gl.viewport(0, 0, width * devicePixelRatio, height * devicePixelRatio);
 }
 
 function init() {
@@ -171,10 +188,9 @@ function init() {
   
   // Only continue if WebGL is available and working
   if (gl) {
+    initResolution(canvas);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);                      // Set clear color to black, fully opaque
-    gl.enable(gl.DEPTH_TEST);                               // Enable depth testing
-    gl.depthFunc(gl.LEQUAL);                                // Near things obscure far things
-    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);      // Clear the color as well as the depth buffer.
+    gl.clear(gl.COLOR_BUFFER_BIT);      // Clear the color as well as the depth buffer.
 
     //Initialize the shaders; this is where all the lighting for the
     //vertices and so forth is established.
@@ -184,6 +200,6 @@ function init() {
     initBuffers();
     
     // Set up to draw the scene periodically.
-    setInterval(drawScene, 15);
+    drawScene();
   }
 }

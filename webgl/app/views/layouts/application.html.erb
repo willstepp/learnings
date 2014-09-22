@@ -8,26 +8,21 @@
   </head>
   <body onload="init()">
     <script id="shader-fs" type="x-shader/x-fragment">
-      varying lowp vec4 vColor;
-      
       void main(void) {
-        gl_FragColor = vColor;
+        gl_FragColor = vec4(1.0,1.0,1.0,1.0);
       }
     </script>
     <script id="shader-vs" type="x-shader/x-vertex">
-      attribute vec3 aVertexPosition;
-      attribute vec4 aVertexColor;
+      attribute vec3 aSierpenskiPosition;
     
       uniform mat4 uMVMatrix;
       uniform mat4 uPMatrix;
-      
-      varying lowp vec4 vColor;
     
       void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-        vColor = aVertexColor;
+        gl_PointSize = 1.0;
+        gl_Position = uPMatrix * uMVMatrix * vec4(aSierpenskiPosition, 1.0);
       }
     </script>
-    <canvas id="ui-canvas" width="640" height="480"></canvas>
+    <canvas id="ui-canvas"></canvas>
   </body>
 </html>
