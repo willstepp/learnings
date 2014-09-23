@@ -1,10 +1,10 @@
-<body onload="webgl.two.sierpenski_points.init()">
-  <script id="shader-fs" type="x-shader/x-fragment">
+<body onload="webgl.two.sierpenski_triangles.init()">
+  <script id="ui-fragment-shader" type="x-shader/x-fragment">
     void main(void) {
       gl_FragColor = vec4(1.0,1.0,1.0,1.0);
     }
   </script>
-  <script id="shader-vs" type="x-shader/x-vertex">
+  <script id="ui-vertex-shader" type="x-shader/x-vertex">
     attribute vec3 aSierpenskiPosition;
   
     uniform mat4 uMVMatrix;
@@ -20,7 +20,7 @@
       <a href="/two" class="button back-link">..</a>
     </div>
     <br><br>
-    <h1>Learnings (Two : Sierpenski Points)</h1>
+    <h1>Learnings (Two : Sierpenski Triangles)</h1>
     <br>
     <canvas id="ui-canvas"></canvas>
   </div>

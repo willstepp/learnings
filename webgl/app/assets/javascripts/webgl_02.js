@@ -1,6 +1,56 @@
 var webgl = webgl || {};
-
 webgl.two = {};
+
+webgl.two.sierpenski_triangles = (function () {
+  'use strict';
+
+  var gl, canvas, shaderProgram;
+  var width = 640;
+  var height = 480;
+  var canvasId = "ui-canvas";
+  var fragmentShaderId = "ui-fragment-shader";
+  var vertextShaderId = "ui-vertex-shader";
+
+  function setupDisplay () {
+    //here we render to the display
+  }
+
+  function setupBuffers () {
+    //here we define the geometry to render
+  }
+
+  function setupShaders() {
+    //here we initialize the programmable shaders (vertext and fragment) and relevant attributes
+    var shaders = webgl.utils.initShaders(gl, vertextShaderId, fragmentShaderId, []);
+    shaderProgram = shaders.program;
+  }
+
+  function setupScene() {
+    //here we setup the correct background color and resolution
+    webgl.utils.initScene(gl, canvas, width, height);
+  }
+
+  function setupGl () {
+    //here we initialize a glcontext on a canvas element
+    return webgl.utils.initGl(canvas);
+  }
+
+  function init () {
+    canvas = document.getElementById(canvasId);
+    gl = setupGl();
+    if (gl) {
+      setupScene();
+      setupShaders();
+      setupBuffers();
+      setupDisplay();
+    }
+  }
+
+  return {
+    init : init
+  };
+})();
+
 webgl.two.sierpenski_points = (function () {
   'use strict';
 
@@ -34,88 +84,10 @@ webgl.two.sierpenski_points = (function () {
     gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
   }
 
-  function initWebGL(canvas) {
-    gl = null;
-    
-    try {
-      // Try to grab the standard context. If it fails, fallback to experimental.
-      gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-    }
-    catch(e) {}
-    
-    // If we don't have a GL context, give up now
-    if (!gl) {
-      alert("Unable to initialize WebGL. Your browser may not support it.");
-      gl = null;
-    }
-    
-    return gl;
-  }
-
-  function getShader(gl, id) {
-    var shaderScript, theSource, currentChild, shader;
-    
-    shaderScript = document.getElementById(id);
-    
-    if (!shaderScript) {
-      return null;
-    }
-    
-    theSource = "";
-    currentChild = shaderScript.firstChild;
-    
-    while(currentChild) {
-      if (currentChild.nodeType == currentChild.TEXT_NODE) {
-        theSource += currentChild.textContent;
-      }
-      
-      currentChild = currentChild.nextSibling;
-    }
-
-    if (shaderScript.type == "x-shader/x-fragment") {
-      shader = gl.createShader(gl.FRAGMENT_SHADER);
-    } else if (shaderScript.type == "x-shader/x-vertex") {
-      shader = gl.createShader(gl.VERTEX_SHADER);
-    } else {
-       // Unknown shader type
-       return null;
-    }
-
-    gl.shaderSource(shader, theSource);
-      
-    // Compile the shader program
-    gl.compileShader(shader);  
-      
-    // See if it compiled successfully
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {  
-        alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));  
-        return null;  
-    }
-      
-    return shader;
-  }
-
   function initShaders() {
-    var fragmentShader = getShader(gl, "shader-fs");
-    var vertexShader = getShader(gl, "shader-vs");
-    
-    // Create the shader program
-    
-    shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
-    
-    // If creating the shader program failed, alert
-    
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-      alert("Unable to initialize the shader program.");
-    }
-    
-    gl.useProgram(shaderProgram);
-
-    sierpenskiPositionAttribute = gl.getAttribLocation(shaderProgram, "aSierpenskiPosition");
-    gl.enableVertexAttribArray(sierpenskiPositionAttribute);
+    var shaders = webgl.utils.initShaders(gl, "shader-vs", "shader-fs", ["aSierpenskiPosition"]);
+    sierpenskiPositionAttribute = shaders.positions.aSierpenskiPosition;
+    shaderProgram = shaders.program;
   }
 
   function rand(min, max) {
@@ -152,10 +124,6 @@ webgl.two.sierpenski_points = (function () {
     return sp;
   }
 
-  function sierpenskiTriangles (numPoints) {
-
-  }
-
   function initBuffers() {
     //sierpenski
     sierpenskiVerticesBuffer = gl.createBuffer();
@@ -179,36 +147,15 @@ webgl.two.sierpenski_points = (function () {
     gl.drawArrays(gl.POINTS, 0, numPoints);
   }
 
-  function initResolution(canvas) {
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
-
-    //ensures high dpi displays are not blurry
-    var devicePixelRatio = window.devicePixelRatio || 1;
-    canvas.width = width * devicePixelRatio;
-    canvas.height = height * devicePixelRatio;
-
-    gl.viewport(0, 0, width * devicePixelRatio, height * devicePixelRatio);
-  }
-
   function init() {
     var canvas = document.getElementById("ui-canvas");
-    gl = initWebGL(canvas); //Initialize the GL context
-    
-    // Only continue if WebGL is available and working
+    gl = webgl.utils.initGl(canvas);
     if (gl) {
-      initResolution(canvas);
-      gl.clearColor(0.0, 0.0, 0.0, 1.0);                      // Set clear color to black, fully opaque
-      gl.clear(gl.COLOR_BUFFER_BIT);      // Clear the color as well as the depth buffer.
+      webgl.utils.initScene(gl, canvas, width, height);
 
-      //Initialize the shaders; this is where all the lighting for the
-      //vertices and so forth is established.
       initShaders();
-      
-      //This function builds all the objects we'll be drawing.
       initBuffers();
       
-      // Set up to draw the scene periodically.
       drawScene();
     }
   }

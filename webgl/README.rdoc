@@ -1,28 +1,10 @@
-== README
-
-This README would normally document whatever steps are necessary to get the
-application up and running.
-
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-
-
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
+Set up a WebGL Dev Environment that is able to display a WebGL program using shaders
+Then re-implement the example programs from Chapter 2, try to figure out the algorithms yourself
+*) Display Hello World WebGL Program
+*) Run through all Mozilla WebGL Examples
+*) Integrate three.js as a helper library
+*) Use Shaders to modify color of output
+*) Implement point-based Sierpenski Gasket
+6) Implement triangle-based Sierpenski Gasket
+7) Implement 3D Sierpenski Gasket
+8) Implement Mouse, Resize, and Keyboard Events

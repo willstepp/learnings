@@ -4,4 +4,7 @@ class TwoController < ApplicationController
   
   def sierpenski_points
   end
+
+  def sierpenski_triangles
+  end
 end
