@@ -10,19 +10,91 @@ webgl.two.sierpenski_triangles = (function () {
   var canvasId = "ui-canvas";
   var fragmentShaderId = "ui-fragment-shader";
   var vertextShaderId = "ui-vertex-shader";
+  var sierpenski = {
+    vertices: null,
+    attributes: {
+      "sierPosition":null
+    }
+  };
+  var numTimesToSubdivide = 5;
+  var numTriangles = 729;  // 3^5 triangles generated
+  var numVertices = 3 * numTriangles;
+
+  function redraw () {
+    webgl.utils.clear(gl);
+
+    //draw sierpenski
+    gl.bindBuffer(gl.ARRAY_BUFFER, sierpenski.vertices);
+    gl.vertexAttribPointer(sierpenski.attributes.sierPosition, 3, gl.FLOAT, true, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, numTriangles);
+  }
 
   function setupDisplay () {
     //here we render to the display
+    redraw();
+  }
+
+  var points = [];
+  function triangle(a, b, c) {
+    points.push(a.x);
+    points.push(a.y);
+    points.push(a.z);
+
+    points.push(b.x);
+    points.push(b.y);
+    points.push(b.z);
+
+    points.push(c.x);
+    points.push(c.y);
+    points.push(c.z);
+  }
+
+  function divide_triangle(a, b, c, count) {
+    if(count > 0) {
+
+      var mid = webgl.utils.midpoint(a.x, a.y, b.x, b.y);
+      mid.push(0.0);
+      var ab = { x:mid[0], y:mid[1], z:mid[2] };
+
+      mid = webgl.utils.midpoint(a.x, a.y, c.x, c.y);
+      mid.push(0.0);
+      var ac = { x:mid[0], y:mid[1], z:mid[2] };
+
+      mid = webgl.utils.midpoint(b.x, b.y, c.x, c.y);
+      mid.push(0.0);
+      var bc = { x:mid[0], y:mid[1], z:mid[2] };
+
+      //subdivide all but inner triangle
+      divide_triangle(a, ab, ac, count-1);
+      divide_triangle(c, ac, bc, count-1);
+      divide_triangle(b, bc, ab, count-1);
+    }
+    else triangle(a,b,c); /* draw triangle at end of recursion */
+  }
+
+  function sierpenskiTriangles () {
+    var triangle = [
+      { x:-1.0, y:-1.0, z:0.0 },
+      { x:0.0, y:1.0, z:0.0 },
+      { x:1.0, y:-1.0, z:0.0 }
+    ];
+    //subdivide the original triangle
+    divide_triangle(triangle[0], triangle[1], triangle[2], numTimesToSubdivide);
   }
 
   function setupBuffers () {
     //here we define the geometry to render
+    sierpenski.vertices = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, sierpenski.vertices);
+    sierpenskiTriangles();
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
   }
 
   function setupShaders() {
-    //here we initialize the programmable shaders (vertext and fragment) and relevant attributes
-    var shaders = webgl.utils.initShaders(gl, vertextShaderId, fragmentShaderId, []);
+    //here we initialize the shaders (vertex and fragment) and associated attributes
+    var shaders = webgl.utils.initShaders(gl, vertextShaderId, fragmentShaderId, Object.keys(sierpenski.attributes));
     shaderProgram = shaders.program;
+    sierpenski.attributes = shaders.attributes;
   }
 
   function setupScene() {
@@ -52,7 +124,7 @@ webgl.two.sierpenski_triangles = (function () {
 })();
 
 webgl.two.sierpenski_points = (function () {
-  'use strict';
+  "use strict";
 
   var gl;
   var width = 640;
@@ -61,44 +133,11 @@ webgl.two.sierpenski_points = (function () {
   var sierpenskiVerticesBuffer;
   var sierpenskiPositionAttribute;
   var shaderProgram;
-  var perspectiveMatrix, orthoMatrix;
-  var mvMatrix;
-
-  function loadIdentity() {
-    mvMatrix = Matrix.I(4);
-  }
-
-  function multMatrix(m) {
-    mvMatrix = mvMatrix.x(m);
-  }
-
-  function mvTranslate(v) {
-    multMatrix(Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4());
-  }
-
-  function setMatrixUniforms() {
-    var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-    gl.uniformMatrix4fv(pUniform, false, new Float32Array(perspectiveMatrix.flatten()));
-
-    var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-    gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
-  }
 
   function initShaders() {
     var shaders = webgl.utils.initShaders(gl, "shader-vs", "shader-fs", ["aSierpenskiPosition"]);
-    sierpenskiPositionAttribute = shaders.positions.aSierpenskiPosition;
+    sierpenskiPositionAttribute = shaders.attributes.aSierpenskiPosition;
     shaderProgram = shaders.program;
-  }
-
-  function rand(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  function midpoint(x1, y1, x2, y2) {
-    var mid = [];
-    mid.push(((x1 + x2) / 2.0));
-    mid.push(((y1 + y2) / 2.0));
-    return mid;
   }
 
   function sierpenskiPoints (numPoints) {
@@ -112,8 +151,8 @@ webgl.two.sierpenski_points = (function () {
     var pointInTriangle = { x:0.25, y:0.50, z:0 };
 
     for (var i = 0; i < numPoints; i += 1) {
-      var randomVert = triangle[rand(0, 2)];
-      var mid = midpoint(randomVert.x, randomVert.y, pointInTriangle.x, pointInTriangle.y);
+      var randomVert = triangle[webgl.utils.rand(0, 2)];
+      var mid = webgl.utils.midpoint(randomVert.x, randomVert.y, pointInTriangle.x, pointInTriangle.y);
       mid.push(0.0); //z plane
       sp.push(mid[0]);
       sp.push(mid[1]);
@@ -129,21 +168,20 @@ webgl.two.sierpenski_points = (function () {
     sierpenskiVerticesBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, sierpenskiVerticesBuffer);
     var sp = sierpenskiPoints(numPoints);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sp), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sp), gl.DYNAMIC_DRAW);
+  }
+
+  function redraw () {
+    window.requestAnimationFrame(drawScene);
   }
 
   function drawScene() {
+    gl.clearColor(0.0, 0.0, 0.0, 1.0); //black opaque
     gl.clear(gl.COLOR_BUFFER_BIT);
-    
-    perspectiveMatrix = makeOrtho(-1, 1, -1, 1, -1, 1);
-    
-    loadIdentity();
 
     //draw sierpenski
     gl.bindBuffer(gl.ARRAY_BUFFER, sierpenskiVerticesBuffer);
     gl.vertexAttribPointer(sierpenskiPositionAttribute, 3, gl.FLOAT, true, 0, 0);
-
-    setMatrixUniforms();
     gl.drawArrays(gl.POINTS, 0, numPoints);
   }
 
@@ -156,7 +194,7 @@ webgl.two.sierpenski_points = (function () {
       initShaders();
       initBuffers();
       
-      drawScene();
+      redraw();
     }
   }
 

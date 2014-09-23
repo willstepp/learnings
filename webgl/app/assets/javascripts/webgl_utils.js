@@ -12,7 +12,7 @@ webgl.utils = (function () {
     
     // If we don't have a GL context, give up now
     if (!gl) {
-      alert("Unable to initialize WebGL. Your browser may not support it.");
+      console.log("Unable to initialize WebGL. Your browser may not support it.");
       gl = null;
     }
     
@@ -21,6 +21,11 @@ webgl.utils = (function () {
 
   function initGl (canvas) {
     return initWebGL(canvas);
+  }
+
+  function clear (glContext) {
+    glContext.clearColor(0.0, 0.0, 0.0, 1.0); //black opaque
+    glContext.clear(glContext.COLOR_BUFFER_BIT);
   }
 
   function initScene (glContext, canvas, width, height) {
@@ -35,8 +40,7 @@ webgl.utils = (function () {
     glContext.viewport(0, 0, width * devicePixelRatio, height * devicePixelRatio);
 
     //set initial view
-    glContext.clearColor(0.0, 0.0, 0.0, 1.0); //black opaque
-    glContext.clear(glContext.COLOR_BUFFER_BIT);
+    clear(glContext);
   }
 
   function getShader(gl, id) {
@@ -75,7 +79,7 @@ webgl.utils = (function () {
       
     // See if it compiled successfully
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {  
-        alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));  
+        console.log("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));  
         return null;  
     }
       
@@ -106,12 +110,26 @@ webgl.utils = (function () {
       shaderPositions[attributeName] = glContext.getAttribLocation(shaderProgram, attributeName);
       glContext.enableVertexAttribArray(shaderPositions[attributeName]);
     }
-    return { program:shaderProgram, positions:shaderPositions };
+    return { program:shaderProgram, attributes:shaderPositions };
+  }
+
+  function midpoint(x1, y1, x2, y2) {
+    var mid = [];
+    mid.push(((x1 + x2) / 2.0));
+    mid.push(((y1 + y2) / 2.0));
+    return mid;
+  }
+
+  function rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   return {
     initGl : initGl,
     initScene : initScene,
-    initShaders : initShaders
+    initShaders : initShaders,
+    midpoint : midpoint,
+    rand : rand,
+    clear : clear
   };
 })();

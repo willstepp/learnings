@@ -7,12 +7,9 @@
   <script id="shader-vs" type="x-shader/x-vertex">
     attribute vec3 aSierpenskiPosition;
   
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
-  
     void main(void) {
       gl_PointSize = 0.5;
-      gl_Position = uPMatrix * uMVMatrix * vec4(aSierpenskiPosition, 1.0);
+      gl_Position = vec4(aSierpenskiPosition, 1.0);
     }
   </script>
   <div class="panel-container">
