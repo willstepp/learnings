@@ -6,23 +6,5 @@
     <%= javascript_include_tag 'application' %>
     <%= csrf_meta_tags %>
   </head>
-  <body onload="init()">
-    <script id="shader-fs" type="x-shader/x-fragment">
-      void main(void) {
-        gl_FragColor = vec4(1.0,1.0,1.0,1.0);
-      }
-    </script>
-    <script id="shader-vs" type="x-shader/x-vertex">
-      attribute vec3 aSierpenskiPosition;
-    
-      uniform mat4 uMVMatrix;
-      uniform mat4 uPMatrix;
-    
-      void main(void) {
-        gl_PointSize = 1.0;
-        gl_Position = uPMatrix * uMVMatrix * vec4(aSierpenskiPosition, 1.0);
-      }
-    </script>
-    <canvas id="ui-canvas"></canvas>
-  </body>
+  <%= yield %>
 </html>

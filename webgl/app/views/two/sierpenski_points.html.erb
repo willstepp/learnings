@@ -1,0 +1,21 @@
+<body onload="webgl.two.sierpenski_points.init()">
+  <script id="shader-fs" type="x-shader/x-fragment">
+    void main(void) {
+      gl_FragColor = vec4(1.0,1.0,1.0,1.0);
+    }
+  </script>
+  <script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aSierpenskiPosition;
+  
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+  
+    void main(void) {
+      gl_PointSize = 0.5;
+      gl_Position = uPMatrix * uMVMatrix * vec4(aSierpenskiPosition, 1.0);
+    }
+  </script>
+  <a href="/two">..</a>
+  <h3>Learnings (Two :: Sierpenski Points)</h3>
+  <canvas id="ui-canvas"></canvas>
+</body>
