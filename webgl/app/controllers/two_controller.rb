@@ -5,6 +5,12 @@ class TwoController < ApplicationController
   def sierpenski_points
   end
 
-  def sierpenski_triangles
+  def sierpenski_triangles_2d
+  end
+
+  def sierpenski_triangles_3d
+  end
+
+  def pyramid
   end
 end

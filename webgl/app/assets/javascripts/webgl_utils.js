@@ -23,9 +23,9 @@ webgl.utils = (function () {
     return initWebGL(canvas);
   }
 
-  function clear (glContext) {
-    glContext.clearColor(0.0, 0.0, 0.0, 1.0); //black opaque
-    glContext.clear(glContext.COLOR_BUFFER_BIT);
+  function clearScene (glContext) {
+    glContext.clearColor(0.0, 0.0, 0.0, 1.0);//black
+    glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
   }
 
   function initScene (glContext, canvas, width, height) {
@@ -38,9 +38,10 @@ webgl.utils = (function () {
     canvas.height = height * devicePixelRatio;
 
     glContext.viewport(0, 0, width * devicePixelRatio, height * devicePixelRatio);
+    glContext.enable(glContext.DEPTH_TEST);
 
-    //set initial view
-    clear(glContext);
+    //set initial scene
+    clearScene(glContext);
   }
 
   function getShader(gl, id) {
@@ -91,32 +92,34 @@ webgl.utils = (function () {
     var vertexShader = getShader(glContext, vertextShaderId);
     
     //create the shader program
-    shaderProgram = glContext.createProgram();
-    glContext.attachShader(shaderProgram, vertexShader);
-    glContext.attachShader(shaderProgram, fragmentShader);
-    glContext.linkProgram(shaderProgram);
+    var program = glContext.createProgram();
+    glContext.attachShader(program, vertexShader);
+    glContext.attachShader(program, fragmentShader);
+    glContext.linkProgram(program);
     
     //if creating the shader program failed, log
-    if (!glContext.getProgramParameter(shaderProgram, glContext.LINK_STATUS)) {
+    if (!glContext.getProgramParameter(program, glContext.LINK_STATUS)) {
       console.log("Unable to initialize the shader program.");
     }
     
-    glContext.useProgram(shaderProgram);
+    glContext.useProgram(program);
 
     //setup shader attribute positions
-    var shaderPositions = {};
+    var attributes = {};
     for (var sa = 0; sa < shaderAttributes.length; sa += 1) {
-      var attributeName = shaderAttributes[sa];
-      shaderPositions[attributeName] = glContext.getAttribLocation(shaderProgram, attributeName);
-      glContext.enableVertexAttribArray(shaderPositions[attributeName]);
+      var name = shaderAttributes[sa];
+      attributes[name] = glContext.getAttribLocation(program, name);
+      glContext.enableVertexAttribArray(attributes[name]);
     }
-    return { program:shaderProgram, attributes:shaderPositions };
+    return { program:program, attributes:attributes };
   }
 
-  function midpoint(x1, y1, x2, y2) {
+  function midpoint(x1, y1, x2, y2, z1, z2) {
     var mid = [];
     mid.push(((x1 + x2) / 2.0));
     mid.push(((y1 + y2) / 2.0));
+    mid.push(0);
+    mid.push(0);
     return mid;
   }
 
@@ -130,6 +133,6 @@ webgl.utils = (function () {
     initShaders : initShaders,
     midpoint : midpoint,
     rand : rand,
-    clear : clear
+    clearScene : clearScene
   };
 })();

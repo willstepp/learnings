@@ -1,0 +1,33 @@
+<body onload="webgl.two.pyramid.init()">
+  <script id="ui-fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+
+    varying vec4 fragColor;
+
+    void main() {
+      gl_FragColor = fragColor;
+    }
+  </script>
+  <script id="ui-vertex-shader" type="x-shader/x-vertex">
+    precision mediump float;
+
+    attribute vec3 apos;
+    attribute vec3 color;
+
+    varying vec4 fragColor;
+  
+    void main() {
+      gl_Position = vec4(apos, 2.0);
+      fragColor = vec4(color, 1.0);
+    }
+  </script>
+  <div class="panel-container">
+    <div>
+      <a href="/two" class="button back-link">..</a>
+    </div>
+    <br><br>
+    <h1>Learnings (Two : Pyramid)</h1>
+    <br>
+    <canvas id="ui-canvas"></canvas>
+  </div>
+</body>

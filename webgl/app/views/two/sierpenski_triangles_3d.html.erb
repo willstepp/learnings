@@ -1,0 +1,34 @@
+<body onload="webgl.two.sierpenski_triangles_3d.init()">
+  <script id="ui-fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+   
+varying vec4 color;
+
+void
+main()
+{
+    gl_FragColor = color;
+}
+  </script>
+  <script id="ui-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 vPosition;
+attribute vec3 vColor;
+varying vec4 color;
+
+void
+main()
+{
+    gl_Position = vec4(vPosition, 1.0);
+    color = vec4(vColor, 1.0);
+}
+  </script>
+  <div class="panel-container">
+    <div>
+      <a href="/two" class="button back-link">..</a>
+    </div>
+    <br><br>
+    <h1>Learnings (Two : Sierpenski 3D Triangles)</h1>
+    <br>
+    <canvas id="ui-canvas"></canvas>
+  </div>
+</body>
