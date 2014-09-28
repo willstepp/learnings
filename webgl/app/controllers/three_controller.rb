@@ -4,4 +4,7 @@ class ThreeController < ApplicationController
 
   def square_rotation
   end
+
+  def cad
+  end
 end

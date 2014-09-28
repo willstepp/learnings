@@ -1,0 +1,26 @@
+<body onload="webgl.three.cad.init()">
+  <script id="ui-fragment-shader" type="x-shader/x-fragment">
+    void main() {
+      gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+  </script>
+  <script id="ui-vertex-shader" type="x-shader/x-vertex">
+    attribute vec4 position;
+    uniform float theta;
+    void main() {
+      gl_Position.x = -sin(theta) * position.x + cos(theta) * position.y;
+      gl_Position.y = sin(theta) * position.y + cos(theta) * position.x;
+      gl_Position.z = 0.0;
+      gl_Position.w = 2.0;
+    }
+  </script>
+  <div class="panel-container">
+    <div>
+      <a href="/three" class="button back-link">..</a>
+    </div>
+    <br><br>
+    <h1>Learnings (Three : CAD)</h1>
+    <br>
+    <canvas id="ui-canvas"></canvas>
+  </div>
+</body>

@@ -7,6 +7,7 @@ Rails.application.routes.draw do
 
   get 'three', to: 'three#index'
   get 'three/square_rotation'
+  get 'three/cad'
 
   root 'home#index'
 end
