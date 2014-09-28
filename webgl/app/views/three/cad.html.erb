@@ -1,19 +1,28 @@
 <body onload="webgl.three.cad.init()">
-  <script id="ui-fragment-shader" type="x-shader/x-fragment">
-    void main() {
-      gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-    }
-  </script>
-  <script id="ui-vertex-shader" type="x-shader/x-vertex">
-    attribute vec4 position;
-    uniform float theta;
-    void main() {
-      gl_Position.x = -sin(theta) * position.x + cos(theta) * position.y;
-      gl_Position.y = sin(theta) * position.y + cos(theta) * position.x;
-      gl_Position.z = 0.0;
-      gl_Position.w = 2.0;
-    }
-  </script>
+  <script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+attribute vec4 vColor;
+
+varying vec4 fColor;
+
+void main()
+{
+    gl_Position = vPosition;
+    fColor = vColor;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec4 fColor;
+void main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
   <div class="panel-container">
     <div>
       <a href="/three" class="button back-link">..</a>
@@ -21,6 +30,22 @@
     <br><br>
     <h1>Learnings (Three : CAD)</h1>
     <br>
-    <canvas id="ui-canvas"></canvas>
-  </div>
+    <div>
+    <select id = "mymenu">
+      <option value = "0">Black</option>
+      <option value = "1">Red</option>
+      <option value = "2">Yellow</option>
+      <option value = "3">Green</option>
+      <option value = "4">Blue</option>
+      <option value = "5">Magenta</option>
+      <option value = "6">Cyan</option>
+    </select>
+
+    <div>
+    <br>
+<canvas id="gl-canvas" width="512" height="512"></canvas>
+</div>
+
+
+
 </body>
