@@ -1,26 +1,25 @@
 <body onload="webgl.three.cad.init()">
-  <script id="vertex-shader" type="x-shader/x-vertex">
-attribute vec4 vPosition;
-attribute vec4 vColor;
+<script id="vertex-shader" type="x-shader/x-vertex">
+  attribute vec4 vPosition;
+  attribute vec4 vColor;
 
-varying vec4 fColor;
+  varying vec4 fColor;
 
-void main()
-{
+  void main()
+  {
     gl_Position = vPosition;
     fColor = vColor;
-}
+  }
 </script>
 
 <script id="fragment-shader" type="x-shader/x-fragment">
+  precision mediump float;
 
-precision mediump float;
-
-varying vec4 fColor;
-void main()
-{
-    gl_FragColor = fColor;
-}
+  varying vec4 fColor;
+  void main()
+  {
+      gl_FragColor = fColor;
+  }
 </script>
 
   <div class="panel-container">
@@ -40,12 +39,18 @@ void main()
       <option value = "5">Magenta</option>
       <option value = "6">Cyan</option>
     </select>
-
+    <div>
+    <br>
+    <div>
+    <button id="ui-render-button">Draw Polygon</button>
     <div>
     <br>
 <canvas id="gl-canvas" width="512" height="512"></canvas>
+<div style="display:inline-block">
+  <h3>Points</h3>
+  <br>
+  <ul id="ui-points">
+  </ul>
 </div>
-
-
-
+</div>
 </body>

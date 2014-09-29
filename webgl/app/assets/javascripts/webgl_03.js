@@ -4,7 +4,7 @@ webgl.three = {};
 //CAD
 webgl.three.cad = (function () {
   'use strict';
-var canvas;
+var canvas, pointsList;
 var gl;
 
 var maxNumTriangles = 200;  
@@ -25,6 +25,10 @@ var colors = [
     vec4( 1.0, 0.0, 1.0, 1.0 ),  // magenta
     vec4( 0.0, 1.0, 1.0, 1.0 )   // cyan
 ];
+
+var numPolygons = 0;
+var numIndices = [0];
+var start = [0];
 
 function getCursorPosition(e) {
   var x;
@@ -48,7 +52,11 @@ function getCursorPosition(e) {
 
 
 function init() {
-    canvas = document.getElementById( "gl-canvas" );
+    canvas = document.getElementById("gl-canvas");
+    pointsList = document.getElementById("ui-points");
+
+    $(pointsList).append("<li>Polygon</li>");
+    $(pointsList).append("<li>-------------</li>");
     
     gl = WebGLUtils.setupWebGL(canvas);
     if (!gl) { alert( "WebGL isn't available" ); }
@@ -57,10 +65,6 @@ function init() {
     gl.clearColor(0.8, 0.8, 0.8, 1.0);
     gl.clear( gl.COLOR_BUFFER_BIT );
 
-
-    //
-    //  Load shaders and initialize attribute buffers
-    //
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
     
@@ -86,55 +90,46 @@ function init() {
       cIndex = m.selectedIndex;
     });
 
-    
+    var b = document.getElementById("ui-render-button");
+    b.addEventListener("click", function (e) {
+      numPolygons++;
+      numIndices[numPolygons] = 0;
+      start[numPolygons] = index;
+      render();
+      $(pointsList).append("<li>Polygon</li>");
+      $(pointsList).append("<li>-------------</li>");
+    });
+
     canvas.addEventListener("mousedown", function(event){
       var pos = getCursorPosition(event);
       var x = pos.x;
       var y = pos.y;
 
-        gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
-        if(first) {
-          first = false;
-          gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
-          console.log("origin x: " + (2*x/canvas.width-1) + " origin y: " + (2*(canvas.height-y)/canvas.height-1));
-          t1 = vec2(2*x/canvas.width-1, 2*(canvas.height-y)/canvas.height-1);
-        }
-        else {
-          first = true;
-          t2 = vec2(2*x/canvas.width-1, 
-            2*(canvas.height-y)/canvas.height-1);
-          t3 = vec2(t1[0], t2[1]);
-          t4 = vec2(t2[0], t1[1]);
+      var vec = vec2(2*x/canvas.width-1, 2*(canvas.height-y)/canvas.height-1);
+      gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 8*index, flatten(vec));
 
-          gl.bufferSubData(gl.ARRAY_BUFFER, 8*index, flatten(t1));
-          gl.bufferSubData(gl.ARRAY_BUFFER, 8*(index+1), flatten(t3));
-          gl.bufferSubData(gl.ARRAY_BUFFER, 8*(index+2), flatten(t2));
-          gl.bufferSubData(gl.ARRAY_BUFFER, 8*(index+3), flatten(t4));
-          gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer);
-          
-          var t = vec4(colors[cIndex]);
 
-          gl.bufferSubData(gl.ARRAY_BUFFER, 16*(index), flatten(t));
-          gl.bufferSubData(gl.ARRAY_BUFFER, 16*(index+1), flatten(t));
-          gl.bufferSubData(gl.ARRAY_BUFFER, 16*(index+2), flatten(t));
-          gl.bufferSubData(gl.ARRAY_BUFFER, 16*(index+3), flatten(t));
-        }
-          index += 4;
-    } );
+      t1 = vec4(colors[cIndex]);
+      gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, flatten(t1));
+
+      $(pointsList).append("<li style='color:rgb(" + t1[0]*255 + "," + t1[1]*255 + "," + t1[2]*255 + ")'>Canvas: ( " + x + ", " + y + " )</li>");
+      $(pointsList).append("<li style='color:rgb(" + t1[0]*255 + "," + t1[1]*255 + "," + t1[2]*255 + ")'>Clipping: ( " + vec[0] + ", " + vec[1] + " )</li>");
+
+      index++;
+      numIndices[numPolygons]++;
+    });
 
     render();
 }
 
 
 function render() {
-    
-    gl.clear( gl.COLOR_BUFFER_BIT );
-
-    for(var i = 0; i<index; i+=4)
-        gl.drawArrays( gl.TRIANGLE_FAN, i, 4 );
-
-    window.requestAnimFrame(render);
-
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  for (var i = 0; i < numPolygons; ++i) {
+    gl.drawArrays(gl.TRIANGLE_FAN, start[i], numIndices[i]);
+  }
 }
 
   return {
