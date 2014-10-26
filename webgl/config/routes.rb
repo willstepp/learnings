@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   get 'three/cad'
 
   get 'four', to: 'four#index'
+  get 'four/rotating_cube', to: 'four#rotating_cube'
 
   root 'home#index'
 end

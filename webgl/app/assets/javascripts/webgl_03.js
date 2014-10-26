@@ -166,6 +166,15 @@ webgl.three.square_rotation = (function () {
   }
 
   function init () {
+    var a = webgl.math.vec2(1, 2);
+    console.log(a);
+    var b = webgl.math.vec2(4, 5);
+    console.log(b);
+    var sum = webgl.math.addVec2(a, b);
+    console.log(sum);
+    var diff = webgl.math.subtractVec2(b, a);
+    console.log(diff);
+
     canvas = document.getElementById("ui-canvas");
     gl = webgl.utils.initGl(canvas);
     if (gl) {

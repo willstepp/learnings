@@ -10,3 +10,35 @@ Render a static 3D Polygon from raw verticies using an Orthographic Perspective
 Color Verticies using Fragment Shader
 Animate (rotate) a 2D Polygon using Vertex Shader
 Dynamically Manipulate a 2D Polygon using a Button
+Render Dynamically created 2D Polygons based on Mouse Input (CAD)
+
+
+Chapter 4:
+
+Geometric Objects
+
+1) Point - Location in space, no size or shape
+2) Scalar - Real number that can represent properties such as distance (magnitude)
+3) Vector - Quanity with direction and magnitude. *has no location in space, no origin* Velocity and Force described with vectors.
+
+No connection between GLSL 'vec' type and geometric vectors. It is a list that can contain any number.
+
+Study on the mathematics of points, scalars, and vectors. (use appendix a,b in book and also in game math book)
+Implement JS functions to perform all these operations so you can be sure to grok it before moving forward
+
+Vector Math (learn formulas and applications for each)
+Addition
+Multipication
+Substraction
+Division
+Dot Product
+Cross Product
+
+Parametric Equation: How to define a line in three dimensions, a path
+
+To Grok:
+  *homogenous coordinates - From projective geometry (opposed to Euclidian geometry) : Coordinates that add an additional dimension 'w' that represents projection distance. The practical purpose in 3D graphics is that it makes affine translations possible with matrix multiplications, so they can be easily calculated with rotation and scaling transformations (its why 4-tuple vector is used to represent a 3D point)
+
+  *affine space - mathematical dimension that has no concept of an origin, used in calculations between entities that are relative to one another, such as vectors, useful because it can be applied to any real space
+
+  *model-view matrix - single matrix that represents a transformation of a 3D object from 'object' space -> 'world' space -> 'view' space, therefore it involves two transformations 1) from object to world space and 2) from world to view space, combined into one transformation matrix that can be applied to objects in a scene.
